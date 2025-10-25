@@ -1,0 +1,16 @@
+{
+  "name": "hostel-ml-attendance",
+  "version": "1.0.0",
+  "description": "Smart Attendance & Hostel Management System with Face Recognition",
+  "main": "index.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "client": "cd frontend && npm start",
+    "python": "cd python-ai && python app.py",
+    "dev:all": "concurrently \"npm run dev\" \"npm run client\" \"npm run python\""
+  },
+  "keywords": ["attendance", "face-recognition", "hostel-management", "mern"],
+  "author": "",
+  "license": "ISC"
+}

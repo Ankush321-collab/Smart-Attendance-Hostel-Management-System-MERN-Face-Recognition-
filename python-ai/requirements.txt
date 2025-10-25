@@ -1,0 +1,6 @@
+flask
+flask-cors
+opencv-python
+pillow
+numpy
+python-dotenv==1.0.0
