@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { hostelAPI } from '../services/api';
 import Navbar from '../components/Navbar';
@@ -6,7 +6,6 @@ import {
   Home, 
   Users, 
   MapPin, 
-  Calendar,
   Phone,
   Mail,
   Building,
@@ -20,33 +19,37 @@ const StudentHostel = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchHostelInfo();
-  }, []);
-
-  const fetchHostelInfo = async () => {
+  const fetchHostelInfo = useCallback(async () => {
     try {
       setLoading(true);
       // Get all rooms to find the student's room
       const response = await hostelAPI.getRooms();
       const rooms = response.data.data;
-      
-      // Find the room where current user is assigned
-      const myRoom = rooms.find(room => 
-        room.occupants.some(occupant => occupant._id === user._id)
+
+      // Find the student's room
+      const studentRoom = rooms.find(room => 
+        room.occupants.some(occupant => occupant._id === user.id)
       );
 
-      if (myRoom) {
-        setRoomInfo(myRoom);
-        setRoommates(myRoom.occupants.filter(occupant => occupant._id !== user._id));
+      if (studentRoom) {
+        setRoomInfo(studentRoom);
+        // Get roommates (exclude current user)
+        const roommates = studentRoom.occupants.filter(occupant => occupant._id !== user.id);
+        setRoommates(roommates);
+      } else {
+        setError('You are not assigned to any room yet. Please contact the administration.');
       }
     } catch (error) {
-      setError('Error fetching hostel information');
-      console.error('Hostel info error:', error);
+      setError('Failed to fetch hostel information');
+      console.error('Fetch hostel info error:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.id]);
+
+  useEffect(() => {
+    fetchHostelInfo();
+  }, [fetchHostelInfo]);
 
   if (loading) {
     return (

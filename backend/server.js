@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
+console.log('MONGODB_URI:', process.env.MONGODB_URI); // Debug log
+
 const app = express();
 
 // Middleware
@@ -33,6 +35,9 @@ app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/face', require('./routes/face'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/hostel', require('./routes/hostel'));
+app.use('/api/visitors', require('./routes/visitor'));
+app.use('/api/maintenance', require('./routes/maintenance'));
+app.use('/api/meals', require('./routes/meal'));
 
 // Root route
 app.get('/', (req, res) => {

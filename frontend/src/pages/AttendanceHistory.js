@@ -5,7 +5,6 @@ import Navbar from '../components/Navbar';
 import { Calendar, TrendingUp, Eye, Filter } from 'lucide-react';
 
 const AttendanceHistory = () => {
-  const { user } = useAuth();
   const [attendance, setAttendance] = useState([]);
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);

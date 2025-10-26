@@ -98,4 +98,53 @@ export const hostelAPI = {
   getUnassignedStudents: () => api.get('/hostel/students/unassigned'),
 };
 
+// Visitor Management API
+export const visitorAPI = {
+  getAll: (params) => api.get('/visitors', { params }),
+  getStats: () => api.get('/visitors/stats'),
+  getById: (id) => api.get(`/visitors/${id}`),
+  checkIn: (data) => api.post('/visitors/checkin', data),
+  checkOut: (id, data) => api.put(`/visitors/${id}/checkout`, data),
+  update: (id, data) => api.put(`/visitors/${id}`, data),
+  delete: (id) => api.delete(`/visitors/${id}`)
+};
+
+// Maintenance Management API
+export const maintenanceAPI = {
+  getAll: (params) => api.get('/maintenance', { params }),
+  getStats: () => api.get('/maintenance/stats'),
+  getById: (id) => api.get(`/maintenance/${id}`),
+  create: (data) => api.post('/maintenance', data),
+  update: (id, data) => api.put(`/maintenance/${id}`, data),
+  delete: (id) => api.delete(`/maintenance/${id}`)
+};
+
+// Meal Management API
+export const mealAPI = {
+  // Weekly meal plans (Admin only)
+  uploadWeeklyPlan: (formData) => api.post('/meals/weekly/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  getWeeklyPlans: (params) => api.get('/meals/weekly', { params }),
+  processWeeklyPlan: (id, data) => api.post(`/meals/weekly/${id}/process`, data),
+  
+  // Daily meal plans
+  getPlans: (params) => api.get('/meals', { params }),
+  getStats: () => api.get('/meals/stats'),
+  createPlan: (data) => api.post('/meals/create', data),
+  // OCR extraction for uploaded file
+  extractText: (formData) => api.post('/meals/ocr-extract', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  create: (data) => api.post('/meals', data),
+  update: (id, data) => api.put(`/meals/${id}`, data),
+  delete: (id) => api.delete(`/meals/${id}`),
+  updateStatus: (id, status) => api.put(`/meals/${id}/status`, { status }),
+  
+  // Feedback and complaints
+  submitFeedback: (id, data) => api.post(`/meals/${id}/feedback`, data),
+  getFeedback: (params) => api.get('/meals/feedback', { params }),
+  resolveFeedback: (id, data) => api.put(`/meals/feedback/${id}/resolve`, data),
+  getMyFeedback: () => api.get('/meals/my-feedback'),
+  getMyStats: () => api.get('/meals/my-stats')
+};
+
 export default api;

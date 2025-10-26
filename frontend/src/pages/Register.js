@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserPlus, Mail, Lock, User, BookOpen, Hash, Phone, AlertCircle, CheckCircle } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, BookOpen, Hash, Phone, AlertCircle } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({

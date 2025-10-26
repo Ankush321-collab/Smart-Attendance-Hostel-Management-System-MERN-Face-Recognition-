@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { hostelAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import { 
   Building, 
-  Users, 
   Bed, 
   Plus, 
-  Search, 
-  Filter, 
   UserPlus, 
   UserMinus,
   Edit,
-  Home,
-  MapPin
+  Home
 } from 'lucide-react';
 
 const AdminHostel = () => {
@@ -29,11 +25,7 @@ const AdminHostel = () => {
     availability: ''
   });
 
-  useEffect(() => {
-    fetchHostelData();
-  }, [filters]);
-
-  const fetchHostelData = async () => {
+  const fetchHostelData = useCallback(async () => {
     try {
       setLoading(true);
       const [roomsRes, overviewRes, studentsRes] = await Promise.all([
@@ -46,12 +38,16 @@ const AdminHostel = () => {
       setOverview(overviewRes.data.data);
       setUnassignedStudents(studentsRes.data.data);
     } catch (error) {
-      setError('Error fetching hostel data');
-      console.error('Hostel data error:', error);
+      setError('Failed to fetch hostel data');
+      console.error('Fetch hostel data error:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    fetchHostelData();
+  }, [fetchHostelData]);
 
   const handleAssignStudent = async (roomId, studentId) => {
     try {

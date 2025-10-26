@@ -12,12 +12,24 @@ router.post('/mark', protect, async (req, res) => {
   try {
     const { studentId, method, confidence, imageUrl, location } = req.body;
 
-    // Find student
+    // SECURITY FIX: Ensure only students can mark their own attendance
+    const currentUser = await User.findById(req.user.id);
+    
+    // Find the student to mark attendance for
     const student = await User.findOne({ studentId });
     if (!student) {
       return res.status(404).json({
         success: false,
         message: 'Student not found'
+      });
+    }
+
+    // CRITICAL SECURITY CHECK: Only allow self-attendance marking
+    if (currentUser.studentId !== studentId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized: You can only mark your own attendance',
+        details: `Logged in as: ${currentUser.studentId}, Attempting to mark for: ${studentId}`
       });
     }
 

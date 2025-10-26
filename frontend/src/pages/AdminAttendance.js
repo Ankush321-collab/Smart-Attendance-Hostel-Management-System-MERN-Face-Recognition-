@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import Navbar from '../components/Navbar';
-import { Search, Filter, Download, Calendar, Eye, Trash2 } from 'lucide-react';
+import { Search, Filter, Download, Calendar, Trash2 } from 'lucide-react';
 
 const AdminAttendance = () => {
-  const { user } = useAuth();
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,11 +19,7 @@ const AdminAttendance = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchAttendance();
-  }, [currentPage, filters]);
-
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -46,7 +41,11 @@ const AdminAttendance = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, filters, searchTerm]);
+
+  useEffect(() => {
+    fetchAttendance();
+  }, [fetchAttendance]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({

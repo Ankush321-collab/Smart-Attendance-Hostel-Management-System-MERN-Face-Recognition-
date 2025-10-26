@@ -10,7 +10,10 @@ import {
   User,
   Building,
   Menu,
-  X 
+  X,
+  Users,
+  Wrench,
+  Utensils
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -31,6 +34,8 @@ const Navbar = () => {
     { to: '/mark-attendance', icon: CheckCircle, label: 'Mark Attendance' },
     { to: '/attendance-history', icon: History, label: 'History' },
     { to: '/hostel', icon: Building, label: 'Hostel' },
+    { to: '/maintenance', icon: Wrench, label: 'Maintenance' },
+    { to: '/meals', icon: Utensils, label: 'Meal Portal' },
   ];
 
   const adminLinks = [
@@ -38,6 +43,9 @@ const Navbar = () => {
     { to: '/admin/attendance', icon: CheckCircle, label: 'Attendance' },
     { to: '/admin/students', icon: User, label: 'Students' },
     { to: '/admin/hostel', icon: Building, label: 'Hostel' },
+    { to: '/admin/visitors', icon: Users, label: 'Visitors' },
+    { to: '/maintenance', icon: Wrench, label: 'Maintenance' },
+    { to: '/admin/meals', icon: Utensils, label: 'Meal Planning' },
   ];
 
   const links = isAdmin ? adminLinks : studentLinks;

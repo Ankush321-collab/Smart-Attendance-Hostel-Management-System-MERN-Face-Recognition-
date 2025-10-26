@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../services/api';
 import Navbar from '../components/Navbar';
-import { Users, Search, Filter, Edit, Trash2, Eye, UserCheck, UserX } from 'lucide-react';
+import { Users, Search, Edit, Trash2, Eye, UserCheck, UserX } from 'lucide-react';
 
 const AdminStudents = () => {
   const [students, setStudents] = useState([]);
@@ -20,11 +20,7 @@ const AdminStudents = () => {
     total: 0
   });
 
-  useEffect(() => {
-    fetchStudents();
-  }, [searchTerm, filters, pagination.page]);
-
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
       const params = {
@@ -42,12 +38,16 @@ const AdminStudents = () => {
         total: response.data.total
       }));
     } catch (error) {
-      setError('Error fetching students');
+      setError('Failed to fetch students');
       console.error('Fetch students error:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, filters, pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));

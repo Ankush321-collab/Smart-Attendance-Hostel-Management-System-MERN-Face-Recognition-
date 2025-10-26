@@ -14,6 +14,11 @@ import AdminAttendance from './pages/AdminAttendance';
 import AdminStudents from './pages/AdminStudents';
 import AdminHostel from './pages/AdminHostel';
 import StudentHostel from './pages/StudentHostel';
+import AdminVisitors from './pages/AdminVisitors';
+import Maintenance from './pages/Maintenance';
+import MealPlanning from './pages/MealPlanning';
+import AdminMealPlanning from './pages/AdminMealPlanning';
+import StudentMealPortal from './pages/StudentMealPortal';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -151,6 +156,48 @@ function AppRoutes() {
           element={
             <ProtectedRoute adminOnly>
               <AdminHostel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/visitors"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminVisitors />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/meals"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminMealPlanning />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Shared Routes */}
+        <Route
+          path="/maintenance"
+          element={
+            <ProtectedRoute>
+              <Maintenance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meals"
+          element={
+            <ProtectedRoute>
+              <StudentMealPortal />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meal-planning"
+          element={
+            <ProtectedRoute>
+              <MealPlanning />
             </ProtectedRoute>
           }
         />
