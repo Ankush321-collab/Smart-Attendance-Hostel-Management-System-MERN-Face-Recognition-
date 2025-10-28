@@ -12,6 +12,17 @@ router.post('/mark', protect, async (req, res) => {
   try {
     const { studentId, method, confidence, imageUrl, location } = req.body;
 
+    // HIGH CONFIDENCE SECURITY CHECK: Require minimum 90% confidence for face recognition
+    if (method === 'face' && confidence && confidence < 90) {
+      return res.status(400).json({
+        success: false,
+        message: `Face recognition confidence ${confidence}% is below required 90% threshold`,
+        details: 'High confidence required to ensure genuine attendance marking',
+        required_confidence: '90%',
+        provided_confidence: `${confidence}%`
+      });
+    }
+
     // SECURITY FIX: Ensure only students can mark their own attendance
     const currentUser = await User.findById(req.user.id);
     

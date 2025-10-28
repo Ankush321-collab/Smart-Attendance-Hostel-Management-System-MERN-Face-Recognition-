@@ -62,8 +62,8 @@ router.post('/enroll', protect, upload.single('image'), async (req, res) => {
       });
     }
 
-    // Send image to Python AI module for encoding
-    const pythonAIUrl = process.env.PYTHON_AI_URL || 'http://localhost:5001';
+    // Send image to Python Face Recognition Server for encoding
+    const pythonServerUrl = process.env.PYTHON_FACE_SERVER_URL || 'http://localhost:8085';
     const imagePath = req.file.path;
     const mockMode = process.env.MOCK_FACE_RECOGNITION === 'true';
 
@@ -72,7 +72,7 @@ router.post('/enroll', protect, upload.single('image'), async (req, res) => {
       
       if (mockMode) {
         // Mock mode for demo purposes
-        console.log('🎭 Running in mock mode - Python AI server not required');
+        console.log('🎭 Running in mock mode - Python server not required');
         encodingData = {
           success: true,
           encoding: Array.from({length: 128}, () => Math.random()),
@@ -81,20 +81,29 @@ router.post('/enroll', protect, upload.single('image'), async (req, res) => {
           note: 'This is a demo encoding for testing purposes'
         };
       } else {
-        // Real Python AI mode
+        // Real Python Face Recognition mode
         const imageBuffer = await fs.readFile(imagePath);
-        const base64Image = imageBuffer.toString('base64');
+        const base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
 
-        console.log(`Attempting to connect to Python AI at: ${pythonAIUrl}/encode`);
+        console.log(`🔗 Connecting to Python Face Recognition Server at: ${pythonServerUrl}/encode`);
         
-        const response = await axios.post(`${pythonAIUrl}/encode`, {
+        const response = await axios.post(`${pythonServerUrl}/encode`, {
           image: base64Image,
           studentId: user.studentId
         }, {
-          timeout: 30000 // 30 second timeout
+          timeout: 30000, // 30 second timeout
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
 
-        console.log('Python AI response:', response.data);
+        console.log('✅ Python Face Recognition Server response:', {
+          success: response.data.success,
+          message: response.data.message,
+          studentId: response.data.studentId,
+          spoof_score: response.data.spoof_score
+        });
+        
         encodingData = response.data;
       }
 
@@ -103,14 +112,21 @@ router.post('/enroll', protect, upload.single('image'), async (req, res) => {
       }
 
       // Save encoding to database
-      await FaceEncoding.findOneAndUpdate(
+      const savedEncoding = await FaceEncoding.findOneAndUpdate(
         { studentId: user.studentId },
         {
           student: user._id,
           studentId: user.studentId,
           encoding: encodingData.encoding,
           imagePath: imagePath,
-          lastUpdated: Date.now()
+          isActive: true,
+          enrollmentDate: new Date(),
+          lastUpdated: Date.now(),
+          metadata: {
+            spoof_score: encodingData.spoof_score,
+            face_location: encodingData.face_location,
+            enrollment_timestamp: encodingData.timestamp
+          }
         },
         { upsert: true, new: true }
       );
@@ -121,12 +137,16 @@ router.post('/enroll', protect, upload.single('image'), async (req, res) => {
       user.profileImage = imagePath;
       await user.save();
 
+      console.log(`✅ Face enrollment completed for student: ${user.studentId}`);
+
       res.status(200).json({
         success: true,
         message: mockMode ? 'Face enrolled successfully (demo mode)' : 'Face enrolled successfully',
         data: {
           studentId: user.studentId,
           isFaceEnrolled: true,
+          enrollmentId: savedEncoding._id,
+          spoof_score: encodingData.spoof_score,
           note: encodingData.note || null
         }
       });
@@ -135,23 +155,34 @@ router.post('/enroll', protect, upload.single('image'), async (req, res) => {
       // Delete uploaded file if AI processing fails
       await fs.unlink(imagePath).catch(console.error);
       
-      console.error('AI Module Error Details:', {
+      console.error('❌ Python Face Recognition Server Error:', {
         message: aiError.message,
         code: aiError.code,
         response: aiError.response?.data,
-        status: aiError.response?.status
+        status: aiError.response?.status,
+        url: `${pythonServerUrl}/encode`
       });
+      
+      // Provide specific error messages based on the response
+      let errorMessage = 'Face encoding failed. Please try again.';
+      if (aiError.response?.data?.message) {
+        errorMessage = aiError.response.data.message;
+      } else if (aiError.code === 'ECONNREFUSED') {
+        errorMessage = 'Face Recognition Server is not running. Please contact administrator.';
+      } else if (aiError.code === 'ETIMEDOUT') {
+        errorMessage = 'Face recognition server timeout. Please try again.';
+      }
       
       return res.status(500).json({
         success: false,
-        message: 'Face encoding failed. Please ensure the image contains a clear face.',
+        message: errorMessage,
         error: aiError.message,
-        details: aiError.response?.data || 'Python AI server connection failed'
+        details: aiError.response?.data || 'Python Face Recognition Server connection failed'
       });
     }
 
   } catch (error) {
-    console.error('Face enrollment error:', error);
+    console.error('❌ Face enrollment error:', error);
     res.status(500).json({
       success: false,
       message: 'Error in face enrollment',
@@ -162,8 +193,8 @@ router.post('/enroll', protect, upload.single('image'), async (req, res) => {
 
 // @route   POST /api/face/recognize
 // @desc    Recognize face and return student info
-// @access  Public (but can be protected if needed)
-router.post('/recognize', upload.single('image'), async (req, res) => {
+// @access  Private
+router.post('/recognize', protect, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -172,7 +203,7 @@ router.post('/recognize', upload.single('image'), async (req, res) => {
       });
     }
 
-    const pythonAIUrl = process.env.PYTHON_AI_URL || 'http://localhost:5001';
+    const pythonServerUrl = process.env.PYTHON_FACE_SERVER_URL || 'http://localhost:8085';
     const imagePath = req.file.path;
     const mockMode = process.env.MOCK_FACE_RECOGNITION === 'true';
 
@@ -181,37 +212,65 @@ router.post('/recognize', upload.single('image'), async (req, res) => {
       
       // Get all enrolled face encodings
       const faceEncodings = await FaceEncoding.find({ isActive: true })
-        .populate('student', 'name studentId department');
+        .populate('student', 'name studentId department email');
+
+      if (faceEncodings.length === 0) {
+        // Clean up uploaded file
+        await fs.unlink(imagePath).catch(console.error);
+        return res.status(400).json({
+          success: false,
+          message: 'No enrolled students found. Please enroll faces first.'
+        });
+      }
+
+      console.log(`🔍 Processing face recognition against ${faceEncodings.length} enrolled students`);
 
       if (mockMode) {
         // Mock mode for demo purposes
         console.log('🎭 Running face recognition in mock mode');
         
-        if (faceEncodings.length === 0) {
-          throw new Error('No enrolled students found for comparison');
-        }
+        // SECURITY FIX: In mock mode, return the current logged-in user if they are enrolled
+        const currentUser = await User.findById(req.user.id);
+        const currentUserEncoding = faceEncodings.find(fe => fe.studentId === currentUser.studentId);
         
-        // Demo: Return the first enrolled student with high confidence
-        const recognizedEncoding = faceEncodings[0];
-        recognitionResult = {
-          success: true,
-          studentId: recognizedEncoding.studentId,
-          confidence: Math.random() * 15 + 85, // 85-100% confidence
-          note: 'This is a demo recognition for testing purposes'
-        };
+        if (currentUserEncoding) {
+          // Return the current user's data
+          recognitionResult = {
+            success: true,
+            studentId: currentUserEncoding.studentId,
+            confidence: Math.random() * 15 + 85, // 85-100% confidence
+            message: 'Face recognized successfully (mock mode)',
+            spoof_score: 1
+          };
+        } else {
+          throw new Error('Current user is not enrolled for face recognition');
+        }
       } else {
-        // Real Python AI mode
+        // Real Python Face Recognition mode
         const imageBuffer = await fs.readFile(imagePath);
-        const base64Image = imageBuffer.toString('base64');
+        const base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
 
-        const response = await axios.post(`${pythonAIUrl}/recognize`, {
+        console.log(`🔗 Connecting to Python Face Recognition Server at: ${pythonServerUrl}/recognize`);
+
+        const response = await axios.post(`${pythonServerUrl}/recognize`, {
           image: base64Image,
           encodings: faceEncodings.map(fe => ({
             studentId: fe.studentId,
             encoding: fe.encoding
           }))
         }, {
-          timeout: 30000
+          timeout: 30000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('✅ Python Face Recognition Server response:', {
+          success: response.data.success,
+          message: response.data.message,
+          studentId: response.data.studentId,
+          confidence: response.data.confidence,
+          spoof_score: response.data.spoof_score
         });
         
         recognitionResult = response.data;
@@ -223,7 +282,11 @@ router.post('/recognize', upload.single('image'), async (req, res) => {
       if (!recognitionResult.success) {
         return res.status(404).json({
           success: false,
-          message: recognitionResult.message || 'Face not recognized'
+          message: recognitionResult.message || 'Face not recognized',
+          details: {
+            spoof_score: recognitionResult.spoof_score,
+            best_confidence: recognitionResult.best_confidence
+          }
         });
       }
 
@@ -235,9 +298,12 @@ router.post('/recognize', upload.single('image'), async (req, res) => {
       if (!recognizedEncoding) {
         return res.status(404).json({
           success: false,
-          message: 'Student not found in database'
+          message: 'Recognized student not found in database'
         });
       }
+
+      // Log successful recognition
+      console.log(`✅ Face recognized: ${recognizedEncoding.student.name} (${recognitionResult.studentId}) with ${recognitionResult.confidence}% confidence`);
 
       res.status(200).json({
         success: true,
@@ -246,7 +312,11 @@ router.post('/recognize', upload.single('image'), async (req, res) => {
           studentId: recognizedEncoding.studentId,
           name: recognizedEncoding.student.name,
           department: recognizedEncoding.student.department,
+          email: recognizedEncoding.student.email,
           confidence: recognitionResult.confidence,
+          distance: recognitionResult.distance,
+          spoof_score: recognitionResult.spoof_score,
+          timestamp: recognitionResult.timestamp,
           note: recognitionResult.note || null
         }
       });
@@ -255,16 +325,34 @@ router.post('/recognize', upload.single('image'), async (req, res) => {
       // Clean up uploaded file
       await fs.unlink(imagePath).catch(console.error);
       
-      console.error('AI Module Error:', aiError.message);
+      console.error('❌ Python Face Recognition Server Error:', {
+        message: aiError.message,
+        code: aiError.code,
+        response: aiError.response?.data,
+        status: aiError.response?.status,
+        url: `${pythonServerUrl}/recognize`
+      });
+
+      // Provide specific error messages based on the response
+      let errorMessage = 'Face recognition failed. Please try again.';
+      if (aiError.response?.data?.message) {
+        errorMessage = aiError.response.data.message;
+      } else if (aiError.code === 'ECONNREFUSED') {
+        errorMessage = 'Face Recognition Server is not running. Please contact administrator.';
+      } else if (aiError.code === 'ETIMEDOUT') {
+        errorMessage = 'Face recognition server timeout. Please try again.';
+      }
+      
       return res.status(500).json({
         success: false,
-        message: 'Face recognition failed',
-        error: aiError.message
+        message: errorMessage,
+        error: aiError.message,
+        details: aiError.response?.data || 'Python Face Recognition Server connection failed'
       });
     }
 
   } catch (error) {
-    console.error('Face recognition error:', error);
+    console.error('❌ Face recognition error:', error);
     res.status(500).json({
       success: false,
       message: 'Error in face recognition',

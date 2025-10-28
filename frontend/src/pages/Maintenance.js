@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { maintenanceAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Maintenance = () => {
   const { user } = useAuth();

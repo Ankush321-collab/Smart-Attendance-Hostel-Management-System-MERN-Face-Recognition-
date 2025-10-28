@@ -1,0 +1,35 @@
+# Core Dependencies
+Flask==2.2.3
+flask-cors==4.0.0
+numpy==1.24.3
+opencv-python==4.7.0
+Pillow==9.5.0
+face-recognition==1.3.0
+dlib==19.24.1
+
+# Anti-spoofing and ML
+torch==2.0.0
+torchvision==0.15.1
+tensorboardX==2.0
+easydict==1.9
+
+# Utilities
+requests==2.28.2
+certifi==2022.12.7
+charset-normalizer==3.1.0
+idna==3.4
+itsdangerous==2.1.2
+Jinja2==3.1.2
+MarkupSafe==2.1.2
+filelock==3.10.0
+protobuf==4.22.1
+six==1.16.0
+sympy==1.11.1
+tqdm==4.31.1
+typing_extensions==4.5.0
+urllib3==1.26.15
+Werkzeug==2.2.3
+mpmath==1.3.0
+networkx==3.0
+colorama==0.4.6
+click==8.1.3

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { mealAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import Navbar from '../components/Navbar';
 import { 
   Calendar, 
@@ -193,174 +194,211 @@ const StudentMealPortal = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
+    return (
+    <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Meal Portal</h1>
-          <p className="mt-2 text-gray-600">
+        <div className="mb-12 text-center animate-in fade-in slide-in-from-bottom duration-700">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+            Meal Portal
+          </h1>
+          <p className="text-xl text-base-content/70 max-w-2xl mx-auto leading-relaxed">
             View today's meals, submit feedback, and track your meal preferences
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Utensils className="h-6 w-6 text-blue-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
+          <div className="group relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl border border-white/20 bg-gradient-to-br from-base-100/80 to-base-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="absolute w-1.5 h-1.5 bg-primary/30 rounded-full animate-float" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, animationDelay: `${i * 0.7}s`, animationDuration: `${4 + Math.random() * 3}s` }} />
+              ))}
+            </div>
+            <div className="relative z-10 flex items-center">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
+                <Utensils className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Meals Today</p>
-                <p className="text-2xl font-bold">{meals.filter(m => new Date(m.date).toDateString() === new Date().toDateString()).length}</p>
+                <p className="text-sm font-semibold text-base-content/70 mb-1 transition-colors duration-300 group-hover:text-base-content">Meals Today</p>
+                <p className="text-2xl font-bold text-base-content transition-all duration-500 group-hover:scale-105">{meals.filter(m => new Date(m.date).toDateString() === new Date().toDateString()).length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Star className="h-6 w-6 text-green-600" />
+          <div className="group relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl border border-white/20 bg-gradient-to-br from-base-100/80 to-base-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4" style={{animationDelay: '100ms'}}>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="absolute w-1.5 h-1.5 bg-green-500/30 rounded-full animate-float" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, animationDelay: `${i * 0.7}s`, animationDuration: `${4 + Math.random() * 3}s` }} />
+              ))}
+            </div>
+            <div className="relative z-10 flex items-center">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
+                <Star className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Avg Rating Given</p>
-                <p className="text-2xl font-bold">{stats.avgRatingGiven?.toFixed(1) || '0.0'}</p>
+                <p className="text-sm font-semibold text-base-content/70 mb-1 transition-colors duration-300 group-hover:text-base-content">Avg Rating Given</p>
+                <p className="text-2xl font-bold text-base-content transition-all duration-500 group-hover:scale-105">{stats.avgRatingGiven?.toFixed(1) || '0.0'}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <MessageSquare className="h-6 w-6 text-yellow-600" />
+          <div className="group relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl border border-white/20 bg-gradient-to-br from-base-100/80 to-base-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4" style={{animationDelay: '200ms'}}>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="absolute w-1.5 h-1.5 bg-yellow-500/30 rounded-full animate-float" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, animationDelay: `${i * 0.7}s`, animationDuration: `${4 + Math.random() * 3}s` }} />
+              ))}
+            </div>
+            <div className="relative z-10 flex items-center">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-500 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
+                <MessageSquare className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Feedback Given</p>
-                <p className="text-2xl font-bold">{stats.totalFeedback || 0}</p>
+                <p className="text-sm font-semibold text-base-content/70 mb-1 transition-colors duration-300 group-hover:text-base-content">Feedback Given</p>
+                <p className="text-2xl font-bold text-base-content transition-all duration-500 group-hover:scale-105">{stats.totalFeedback || 0}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertCircle className="h-6 w-6 text-red-600" />
+          <div className="group relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl border border-white/20 bg-gradient-to-br from-base-100/80 to-base-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4" style={{animationDelay: '300ms'}}>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="absolute w-1.5 h-1.5 bg-red-500/30 rounded-full animate-float" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, animationDelay: `${i * 0.7}s`, animationDuration: `${4 + Math.random() * 3}s` }} />
+              ))}
+            </div>
+            <div className="relative z-10 flex items-center">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
+                <AlertCircle className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Open Complaints</p>
-                <p className="text-2xl font-bold">{stats.pendingComplaints || 0}</p>
+                <p className="text-sm font-semibold text-base-content/70 mb-1 transition-colors duration-300 group-hover:text-base-content">Open Complaints</p>
+                <p className="text-2xl font-bold text-base-content transition-all duration-500 group-hover:scale-105">{stats.pendingComplaints || 0}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* View Controls */}
-        <div className="bg-white rounded-lg shadow mb-8 p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center">
-            <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-              <button
-                onClick={() => setViewMode('today')}
-                className={`px-4 py-2 rounded-lg ${viewMode === 'today' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => setViewMode('week')}
-                className={`px-4 py-2 rounded-lg ${viewMode === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-              >
-                This Week
-              </button>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => handleDateChange(-1)}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              
-              <div className="text-center">
-                <p className="font-semibold text-lg">
-                  {viewMode === 'today' ? formatDate(currentDate) : `Week of ${formatDate(currentDate)}`}
-                </p>
+        <div className="relative mb-12">
+          <div className="backdrop-blur-xl bg-base-100/50 rounded-3xl p-6 md:p-8 border border-white/20 shadow-2xl animate-in fade-in slide-in-from-bottom duration-500 delay-400">
+            <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
+              <div className="flex bg-base-200/50 rounded-2xl p-1.5 backdrop-blur-sm border border-white/20">
+                <button
+                  onClick={() => setViewMode('today')}
+                  className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${viewMode === 'today' ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg' : 'text-base-content/70 hover:text-base-content hover:bg-base-300/50'}`}
+                >
+                  Today
+                </button>
+                <button
+                  onClick={() => setViewMode('week')}
+                  className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${viewMode === 'week' ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg' : 'text-base-content/70 hover:text-base-content hover:bg-base-300/50'}`}
+                >
+                  This Week
+                </button>
               </div>
-              
-              <button
-                onClick={() => handleDateChange(1)}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
+
+              <div className="flex items-center space-x-6">
+                <button
+                  onClick={() => handleDateChange(-1)}
+                  className="p-3 rounded-2xl bg-base-200/50 backdrop-blur-sm border border-white/20 text-base-content/70 hover:text-base-content hover:bg-base-300/50 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                
+                <div className="text-center min-w-[200px]">
+                  <p className="font-bold text-lg text-base-content bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    {viewMode === 'today' ? formatDate(currentDate) : `Week of ${formatDate(currentDate)}`}
+                  </p>
+                </div>
+                
+                <button
+                  onClick={() => handleDateChange(1)}
+                  className="p-3 rounded-2xl bg-base-200/50 backdrop-blur-sm border border-white/20 text-base-content/70 hover:text-base-content hover:bg-base-300/50 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Meals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {meals.map(meal => {
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
+          {meals.map((meal, index) => {
             const IconComponent = mealIcons[meal.mealType.toLowerCase()] || Utensils;
             const status = getMealStatus(meal);
             
             return (
-              <div key={meal._id} className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="p-6">
+              <div key={meal._id} className="group relative overflow-hidden rounded-2xl backdrop-blur-xl border border-white/20 bg-gradient-to-br from-base-100/80 to-base-200/60 shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-3 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4" style={{animationDelay: `${index * 100}ms`}}>
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="absolute w-1.5 h-1.5 bg-primary/30 rounded-full animate-float" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, animationDelay: `${i * 0.7}s`, animationDuration: `${4 + Math.random() * 3}s` }} />
+                  ))}
+                </div>
+                
+                <div className="relative z-10 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
-                      <div className="p-2 bg-blue-100 rounded-lg mr-3">
-                        <IconComponent className="h-6 w-6 text-blue-600" />
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-secondary shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
+                        <IconComponent className="h-6 w-6 text-white" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-lg capitalize">{meal.mealType}</h3>
-                        <p className="text-sm text-gray-600 flex items-center">
+                      <div className="ml-4">
+                        <h3 className="font-bold text-lg text-base-content capitalize transition-colors duration-300 group-hover:text-primary">{meal.mealType}</h3>
+                        <p className="text-sm text-base-content/70 flex items-center transition-colors duration-300 group-hover:text-base-content/90">
                           <Clock className="h-4 w-4 mr-1" />
                           {formatTime(meal.mealType)}
                         </p>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(status)}`}>
+                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border transition-all duration-300 group-hover:scale-110 ${getStatusColor(status)}`}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                   </div>
 
                   <div className="mb-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Menu Items:</p>
-                    <div className="space-y-1">
-                      {meal.items.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">{item.name}</span>
-                          <span className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                    <p className="text-sm font-semibold text-base-content/80 mb-3 transition-colors duration-300 group-hover:text-base-content">Menu Items:</p>
+                    <div className="space-y-2">
+                      {meal.items.map((item, itemIndex) => (
+                        <div key={itemIndex} className="flex items-center justify-between py-2 px-3 rounded-lg bg-base-200/50 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:bg-base-300/50 hover:scale-[1.02]">
+                          <span className="text-sm text-base-content font-medium">{item.name}</span>
+                          <span className={`w-3 h-3 rounded-full border-2 border-white shadow-lg transition-all duration-300 hover:scale-125 ${item.isVeg ? 'bg-green-500' : 'bg-red-500'}`}></span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {meal.averageRating && (
-                    <div className="flex items-center mb-4">
-                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                      <span className="text-sm text-gray-600">
-                        {meal.averageRating.toFixed(1)} ({meal.totalRatings} ratings)
+                    <div className="flex items-center mb-4 p-3 rounded-lg bg-base-200/50 backdrop-blur-sm">
+                      <Star className="h-5 w-5 text-yellow-400 mr-2 fill-current" />
+                      <span className="text-sm font-semibold text-base-content">
+                        {meal.averageRating.toFixed(1)} 
+                        <span className="text-base-content/70 ml-1">({meal.totalRatings} ratings)</span>
                       </span>
                     </div>
                   )}
 
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-3">
                     <button
                       onClick={() => openFeedbackModal(meal, 'review')}
-                      className="flex-1 btn-secondary text-sm flex items-center justify-center"
+                      className="flex-1 group/btn relative overflow-hidden bg-gradient-to-r from-primary to-secondary text-white py-3 rounded-xl font-semibold text-sm shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50"
                     >
-                      <ThumbsUp className="h-4 w-4 mr-1" />
-                      Rate
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        <ThumbsUp className="h-4 w-4 transition-transform duration-300 group-hover/btn:scale-110" />
+                        Rate
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-secondary to-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
                     </button>
+                    
                     <button
                       onClick={() => openFeedbackModal(meal, 'complaint')}
-                      className="flex-1 btn-outline text-sm flex items-center justify-center"
+                      className="flex-1 group/btn relative overflow-hidden bg-gradient-to-r from-base-300 to-base-400 text-base-content py-3 rounded-xl font-semibold text-sm border border-base-300 transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-base-300"
                     >
-                      <MessageSquare className="h-4 w-4 mr-1" />
-                      Complain
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        <MessageSquare className="h-4 w-4 transition-transform duration-300 group-hover/btn:scale-110" />
+                        Complain
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -370,96 +408,124 @@ const StudentMealPortal = () => {
         </div>
 
         {meals.length === 0 && (
-          <div className="text-center py-12">
-            <Utensils className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No meals scheduled for this {viewMode}</p>
+          <div className="text-center py-16 animate-in fade-in duration-700">
+            <div className="relative inline-block mb-6">
+              <Utensils className="h-16 w-16 text-base-content/30 mx-auto" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                <Utensils className="h-16 w-16 opacity-50" />
+              </div>
+            </div>
+            <p className="text-xl text-base-content/70 font-medium">No meals scheduled for this {viewMode}</p>
           </div>
         )}
 
         {/* My Feedback Section */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-bold">My Recent Feedback</h2>
-          </div>
-          <div className="p-6">
-            {myFeedback.length > 0 ? (
-              <div className="space-y-4">
-                {myFeedback.slice(0, 5).map(feedback => (
-                  <div key={feedback._id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            feedback.feedbackType === 'complaint' 
-                              ? 'bg-red-100 text-red-800' 
-                              : 'bg-green-100 text-green-800'
-                          }`}>
-                            {feedback.feedbackType}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {new Date(feedback.createdAt).toLocaleDateString()}
-                          </span>
-                          {feedback.feedbackType === 'review' && (
-                            <div className="flex items-center">
-                              <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                              <span className="text-sm">{feedback.rating}/5</span>
+        <div className="relative mb-8">
+          <div className="backdrop-blur-xl bg-base-100/50 rounded-3xl border border-white/20 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom duration-500 delay-600">
+            <div className="px-6 md:px-8 py-6 border-b border-base-300/30">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-base-content to-base-content/80 bg-clip-text text-transparent">My Recent Feedback</h2>
+            </div>
+            
+            <div className="p-6 md:p-8">
+              {myFeedback.length > 0 ? (
+                <div className="space-y-4">
+                  {myFeedback.slice(0, 5).map((feedback, index) => (
+                    <div key={feedback._id} className="group relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl border border-white/20 bg-gradient-to-br from-base-100/80 to-base-200/60 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] animate-in fade-in slide-in-from-left" style={{animationDelay: `${index * 50}ms`}}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <span className={`px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border transition-all duration-300 group-hover:scale-105 ${feedback.feedbackType === 'complaint' ? 'bg-error/20 text-error border-error/20' : 'bg-success/20 text-success border-success/20'}`}>
+                              {feedback.feedbackType}
+                            </span>
+                            <span className="text-sm text-base-content/70 font-medium">
+                              {new Date(feedback.createdAt).toLocaleDateString()}
+                            </span>
+                            {feedback.feedbackType === 'review' && (
+                              <div className="flex items-center bg-base-200/50 px-2 py-1 rounded-lg">
+                                <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+                                <span className="text-sm font-semibold">{feedback.rating}/5</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <p className="text-base-content font-medium mb-3">{feedback.comments}</p>
+                          
+                          {feedback.adminResponse && (
+                            <div className="mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20 backdrop-blur-sm transition-all duration-300 group-hover:bg-primary/15">
+                              <p className="text-sm font-semibold text-primary mb-1">Admin Response:</p>
+                              <p className="text-sm text-base-content/90">{feedback.adminResponse}</p>
                             </div>
                           )}
                         </div>
-                        <p className="text-gray-800">{feedback.comments}</p>
-                        {feedback.adminResponse && (
-                          <div className="mt-2 p-3 bg-blue-50 rounded">
-                            <p className="text-sm text-blue-800">
-                              <strong>Admin Response:</strong> {feedback.adminResponse}
-                            </p>
-                          </div>
-                        )}
+                        
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border transition-all duration-300 group-hover:scale-105 ml-4 ${feedback.status === 'resolved' ? 'bg-success/20 text-success border-success/20' : 'bg-warning/20 text-warning border-warning/20'}`}>
+                          {feedback.status}
+                        </span>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        feedback.status === 'resolved' 
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {feedback.status}
-                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 animate-in fade-in duration-500">
+                  <div className="relative inline-block mb-6">
+                    <MessageSquare className="h-16 w-16 text-base-content/30 mx-auto" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      <MessageSquare className="h-16 w-16 opacity-50" />
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No feedback submitted yet</p>
-              </div>
-            )}
+                  <p className="text-xl text-base-content/70 font-medium mb-8">No feedback submitted yet</p>
+                  <button
+                    onClick={() => meals.length > 0 && openFeedbackModal(meals[0], 'review')}
+                    className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    Share Your First Feedback
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Feedback Modal */}
       {feedbackModal && selectedMeal && (
-        <div className="modal-overlay">
-          <div className="modal-content max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              {feedbackForm.feedbackType === 'complaint' ? 'Submit Complaint' : 'Rate Meal'}
-            </h2>
-            <p className="text-gray-600 mb-4">
-              {selectedMeal.mealType} - {new Date(selectedMeal.date).toLocaleDateString()}
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-base-content/50 backdrop-blur-sm" onClick={() => setFeedbackModal(false)} />
+          
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto backdrop-blur-2xl bg-base-100/95 border border-white/20 rounded-3xl shadow-3xl animate-in zoom-in duration-500 slide-in-from-bottom-8">
             
-            <form onSubmit={submitFeedback}>
+            <div className="sticky top-0 backdrop-blur-xl bg-base-100/80 border-b border-white/20 p-6 rounded-t-3xl">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {feedbackForm.feedbackType === 'complaint' ? 'Submit Complaint' : 'Rate Meal'}
+                </h3>
+                <button
+                  onClick={() => setFeedbackModal(false)}
+                  className="p-2 hover:bg-base-300 rounded-xl transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  <svg className="w-6 h-6 text-base-content/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-base-content/70 mt-2">
+                {selectedMeal.mealType} - {new Date(selectedMeal.date).toLocaleDateString()}
+              </p>
+            </div>
+
+            <form onSubmit={submitFeedback} className="p-6 space-y-6">
               {feedbackForm.feedbackType === 'review' && (
-                <div className="form-group">
-                  <label className="form-label">Rating</label>
-                  <div className="flex space-x-2">
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-base-content/80">Rating</label>
+                  <div className="flex justify-center space-x-4">
                     {[1, 2, 3, 4, 5].map(star => (
                       <button
                         key={star}
                         type="button"
                         onClick={() => setFeedbackForm({...feedbackForm, rating: star})}
-                        className={`p-1 ${star <= feedbackForm.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                        className={`p-2 transition-all duration-300 transform hover:scale-125 ${star <= feedbackForm.rating ? 'text-yellow-400 scale-110' : 'text-base-300 hover:text-yellow-300'}`}
                       >
-                        <Star className="h-6 w-6 fill-current" />
+                        <Star className="h-8 w-8 fill-current" />
                       </button>
                     ))}
                   </div>
@@ -468,12 +534,12 @@ const StudentMealPortal = () => {
 
               {feedbackForm.feedbackType === 'complaint' && (
                 <>
-                  <div className="form-group">
-                    <label className="form-label">Complaint Category</label>
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-base-content/80">Complaint Category</label>
                     <select
                       value={feedbackForm.category}
                       onChange={(e) => setFeedbackForm({...feedbackForm, category: e.target.value})}
-                      className="form-input"
+                      className="w-full bg-base-200 border border-base-300 rounded-xl px-4 py-3 font-medium transition-all duration-300 focus:ring-2 focus:ring-primary/50 focus:border-primary backdrop-blur-sm"
                       required
                     >
                       <option value="">Select category</option>
@@ -486,12 +552,12 @@ const StudentMealPortal = () => {
                     </select>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Priority</label>
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-base-content/80">Priority</label>
                     <select
                       value={feedbackForm.priority}
                       onChange={(e) => setFeedbackForm({...feedbackForm, priority: e.target.value})}
-                      className="form-input"
+                      className="w-full bg-base-200 border border-base-300 rounded-xl px-4 py-3 font-medium transition-all duration-300 focus:ring-2 focus:ring-primary/50 focus:border-primary backdrop-blur-sm"
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -502,29 +568,29 @@ const StudentMealPortal = () => {
                 </>
               )}
 
-              <div className="form-group">
-                <label className="form-label">Comments</label>
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-base-content/80">Comments</label>
                 <textarea
                   value={feedbackForm.comments}
                   onChange={(e) => setFeedbackForm({...feedbackForm, comments: e.target.value})}
-                  className="form-input"
+                  className="w-full bg-base-200 border border-base-300 rounded-xl px-4 py-3 font-medium transition-all duration-300 focus:ring-2 focus:ring-primary/50 focus:border-primary backdrop-blur-sm resize-none"
                   rows="4"
-                  placeholder={feedbackForm.feedbackType === 'complaint' ? 
-                    "Describe the issue in detail..." : 
-                    "Share your thoughts about this meal..."
-                  }
+                  placeholder={feedbackForm.feedbackType === 'complaint' ? "Describe the issue in detail..." : "Share your thoughts about this meal..."}
                   required
                 />
               </div>
 
-              <div className="flex space-x-4 mt-6">
-                <button type="submit" className="btn-primary">
+              <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-base-300/30">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-primary to-secondary text-white py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
                   Submit {feedbackForm.feedbackType === 'complaint' ? 'Complaint' : 'Review'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setFeedbackModal(false)}
-                  className="btn-secondary"
+                  className="flex-1 py-3 border border-base-300 rounded-xl font-semibold text-base-content/70 transition-all duration-300 hover:bg-base-300 hover:text-base-content hover:scale-105 focus:outline-none focus:ring-2 focus:ring-base-300"
                 >
                   Cancel
                 </button>

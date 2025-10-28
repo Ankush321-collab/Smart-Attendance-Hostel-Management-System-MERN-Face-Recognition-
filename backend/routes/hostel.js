@@ -318,4 +318,54 @@ router.get('/students/unassigned', protect, authorize('admin'), async (req, res)
   }
 });
 
+// @route   GET /api/hostel/my-room
+// @desc    Get current user's room information
+// @access  Private (Student)
+router.get('/my-room', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Find the room that contains this user
+    const room = await HostelRoom.findOne({ 
+      occupants: userId 
+    }).populate('occupants', 'name studentId email department semester phoneNumber');
+
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: 'You are not assigned to any room yet. Please contact the hostel administration.'
+      });
+    }
+
+    // Get user's information
+    const user = await User.findById(userId);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        room: {
+          roomNumber: room.roomNumber,
+          floor: room.floor,
+          type: room.type,
+          capacity: room.capacity,
+          facilities: room.facilities,
+          isAvailable: room.isAvailable
+        },
+        occupants: room.occupants,
+        user: {
+          name: user.name,
+          studentId: user.studentId,
+          roomNumber: user.roomNumber
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching room information',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;

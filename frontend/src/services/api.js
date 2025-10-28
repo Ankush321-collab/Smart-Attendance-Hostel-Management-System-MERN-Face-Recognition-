@@ -96,6 +96,7 @@ export const hostelAPI = {
   removeStudent: (roomId, studentId) => api.delete(`/hostel/rooms/${roomId}/remove/${studentId}`),
   getOverview: () => api.get('/hostel/overview'),
   getUnassignedStudents: () => api.get('/hostel/students/unassigned'),
+  getMyRoom: () => api.get('/hostel/my-room'),
 };
 
 // Visitor Management API

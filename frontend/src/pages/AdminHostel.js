@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { hostelAPI } from '../services/api';
+import { useTheme } from '../contexts/ThemeContext';
 import Navbar from '../components/Navbar';
 import { 
   Building, 
@@ -95,81 +96,159 @@ const AdminHostel = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md">
-          <h3 className="text-lg font-bold mb-4">Create New Room</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Room Number</label>
-              <input
-                type="text"
-                required
-                value={formData.roomNumber}
-                onChange={(e) => setFormData({...formData, roomNumber: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="101, 102, etc."
-              />
+  <div className="fixed inset-0 bg-base-300/80 backdrop-blur-xl flex items-center justify-center z-50 p-4 transition-all duration-300">
+    {/* Floating particles background */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-2 h-2 bg-primary/20 rounded-full animate-float"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${i * 0.5}s`,
+            animationDuration: `${3 + Math.random() * 4}s`
+          }}
+        />
+      ))}
+    </div>
+
+    <div className="relative w-full max-w-md">
+      {/* Glass morphism card with 3D transform */}
+      <div className="bg-base-100/80 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl transform-gpu transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 motion-reduce:transform-none">
+        
+        {/* Gradient border animation */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500 -z-10" />
+        
+        <div className="p-8 space-y-6">
+          {/* Header with icon */}
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto transform-gpu transition-transform duration-300 hover:scale-110 hover:rotate-3">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Floor</label>
-              <input
-                type="number"
-                required
-                value={formData.floor}
-                onChange={(e) => setFormData({...formData, floor: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                min="1"
-              />
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Create New Room
+            </h3>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Form fields with enhanced styling */}
+            <div className="space-y-4">
+              {[
+                {
+                  label: "Room Number",
+                  type: "text",
+                  value: formData.roomNumber,
+                  onChange: (e) => setFormData({...formData, roomNumber: e.target.value}),
+                  placeholder: "101, 102, etc."
+                },
+                {
+                  label: "Floor",
+                  type: "number",
+                  value: formData.floor,
+                  onChange: (e) => setFormData({...formData, floor: e.target.value}),
+                  min: "1"
+                },
+                {
+                  label: "Capacity",
+                  type: "number",
+                  value: formData.capacity,
+                  onChange: (e) => setFormData({...formData, capacity: e.target.value}),
+                  min: "1",
+                  max: "4"
+                }
+              ].map((field, index) => (
+                <div 
+                  key={field.label}
+                  className="transform-gpu transition-all duration-300 hover:scale-[1.02] motion-reduce:transform-none"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <label className="block text-sm font-semibold mb-2 text-base-content/80">
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    required
+                    value={field.value}
+                    onChange={field.onChange}
+                    min={field.min}
+                    max={field.max}
+                    className="w-full px-4 py-3 bg-base-200/50 border border-base-300 rounded-2xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 backdrop-blur-sm placeholder-base-content/40"
+                    placeholder={field.placeholder}
+                  />
+                </div>
+              ))}
+
+              {/* Room Type Select */}
+              <div className="transform-gpu transition-all duration-300 hover:scale-[1.02] motion-reduce:transform-none">
+                <label className="block text-sm font-semibold mb-2 text-base-content/80">
+                  Room Type
+                </label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({...formData, type: e.target.value})}
+                  className="w-full px-4 py-3 bg-base-200/50 border border-base-300 rounded-2xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 backdrop-blur-sm appearance-none"
+                >
+                  <option value="single">Single Room</option>
+                  <option value="double">Double Room</option>
+                  <option value="triple">Triple Room</option>
+                  <option value="quad">Quad Room</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                  <svg className="h-4 w-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Capacity</label>
-              <input
-                type="number"
-                required
-                value={formData.capacity}
-                onChange={(e) => setFormData({...formData, capacity: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                min="1"
-                max="4"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Room Type</label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({...formData, type: e.target.value})}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="single">Single</option>
-                <option value="double">Double</option>
-                <option value="triple">Triple</option>
-                <option value="quad">Quad</option>
-              </select>
-            </div>
-            <div className="flex gap-3">
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-4">
               <button
                 type="button"
                 onClick={() => setShowCreateRoom(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex-1 px-6 py-3 bg-base-200/50 text-base-content rounded-2xl border border-base-300 transform-gpu transition-all duration-300 hover:scale-105 hover:bg-base-300/50 active:scale-95 motion-reduce:transform-none font-semibold backdrop-blur-sm"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-primary-content rounded-2xl transform-gpu transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 motion-reduce:transform-none font-semibold relative overflow-hidden group"
               >
-                Create Room
+                <span className="relative z-10">Create Room</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-secondary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
             </div>
           </form>
         </div>
       </div>
-    );
+    </div>
+
+    <style jsx>{`
+      @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+      }
+      .animate-float {
+        animation: float linear infinite;
+      }
+      
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        .animate-float {
+          animation: none;
+        }
+      }
+    `}</style>
+  </div>
+);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
         <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="spinner"></div>
@@ -179,19 +258,19 @@ const AdminHostel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Hostel Management</h1>
-            <p className="mt-2 text-gray-600">Manage rooms, assignments, and occupancy</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-200">Hostel Management</h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-400 transition-colors duration-200">Manage rooms, assignments, and occupancy</p>
           </div>
           <button
             onClick={() => setShowCreateRoom(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200"
           >
             <Plus className="w-4 h-4" />
             Add Room
@@ -200,7 +279,7 @@ const AdminHostel = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-300 px-4 py-3 rounded-lg mb-6 transition-colors duration-200">
             {error}
           </div>
         )}
@@ -208,43 +287,43 @@ const AdminHostel = () => {
         {/* Overview Statistics */}
         {overview && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Total Rooms</p>
-                  <p className="text-3xl font-bold text-gray-900">{overview.overview.totalRooms}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 font-medium transition-colors duration-200">Total Rooms</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-200">{overview.overview.totalRooms}</p>
                 </div>
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Occupied Beds</p>
-                  <p className="text-3xl font-bold text-green-600">{overview.overview.occupiedBeds}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 font-medium transition-colors duration-200">Occupied Beds</p>
+                  <p className="text-3xl font-bold text-green-600 dark:text-green-400 transition-colors duration-200">{overview.overview.occupiedBeds}</p>
                 </div>
-                <Bed className="h-8 w-8 text-green-600" />
+                <Bed className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Available Beds</p>
-                  <p className="text-3xl font-bold text-orange-600">{overview.overview.availableBeds}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 font-medium transition-colors duration-200">Available Beds</p>
+                  <p className="text-3xl font-bold text-orange-600 dark:text-orange-400 transition-colors duration-200">{overview.overview.availableBeds}</p>
                 </div>
-                <Bed className="h-8 w-8 text-orange-600" />
+                <Bed className="h-8 w-8 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-colors duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Occupancy Rate</p>
-                  <p className="text-3xl font-bold text-purple-600">{overview.overview.occupancyRate}%</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 font-medium transition-colors duration-200">Occupancy Rate</p>
+                  <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 transition-colors duration-200">{overview.overview.occupancyRate}%</p>
                 </div>
-                <Home className="h-8 w-8 text-purple-600" />
+                <Home className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </div>

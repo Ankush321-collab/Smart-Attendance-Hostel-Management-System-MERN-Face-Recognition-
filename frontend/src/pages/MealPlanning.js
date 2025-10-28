@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { mealAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const MealPlanning = () => {
   const { user } = useAuth();

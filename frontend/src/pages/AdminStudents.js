@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../services/api';
+import { useTheme } from '../contexts/ThemeContext';
 import Navbar from '../components/Navbar';
-import { Users, Search, Edit, Trash2, Eye, UserCheck, UserX } from 'lucide-react';
+import { Users, Search, Edit, Trash2, Eye, UserCheck, UserX, AlertCircle } from 'lucide-react';
 
 const AdminStudents = () => {
   const [students, setStudents] = useState([]);
@@ -65,208 +66,292 @@ const AdminStudents = () => {
     }
   };
 
-  const renderStudentCard = (student) => (
-    <div key={student._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Users className="w-6 h-6 text-blue-600" />
+  const renderStudentCard = (student, index) => (
+  <div 
+    key={student._id} 
+    className="group relative transform-gpu transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 motion-reduce:transform-none"
+    style={{ animationDelay: `${index * 100}ms` }}
+  >
+    {/* Floating particles */}
+    <div className="absolute -inset-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 bg-primary/30 rounded-full animate-float"
+          style={{
+            left: `${20 + i * 30}%`,
+            animationDelay: `${i * 0.3}s`,
+            animationDuration: `${2 + i * 0.5}s`
+          }}
+        />
+      ))}
+    </div>
+
+    {/* Gradient border */}
+    <div className="absolute -inset-0.5 bg-gradient-to-br from-primary/30 via-secondary/30 to-accent/30 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105" />
+    
+    {/* Glass morphism card */}
+    <div className="relative bg-base-100/70 dark:bg-base-200/50 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl transition-all duration-500 p-6 overflow-hidden">
+      
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      <div className="relative">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-4">
+            {/* Animated avatar */}
+            <div className="relative">
+              <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center transform-gpu transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 motion-reduce:transform-none shadow-lg">
+                <Users className="w-7 h-7 text-white transform transition-transform duration-300 group-hover:scale-110" />
+              </div>
+              {/* Status indicator */}
+              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-base-100 transition-colors duration-300 ${
+                student.isActive ? 'bg-success' : 'bg-error'
+              }`} />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">{student.name}</h3>
-              <p className="text-sm text-gray-600">{student.studentId}</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">Email:</span>
-              <p className="text-gray-900">{student.email}</p>
-            </div>
-            <div>
-              <span className="text-gray-500">Department:</span>
-              <p className="text-gray-900">{student.department || 'N/A'}</p>
-            </div>
-            <div>
-              <span className="text-gray-500">Semester:</span>
-              <p className="text-gray-900">{student.semester || 'N/A'}</p>
-            </div>
-            <div>
-              <span className="text-gray-500">Room:</span>
-              <p className="text-gray-900">{student.roomNumber || 'Not assigned'}</p>
+            
+            <div className="space-y-1">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-base-content to-base-content/80 bg-clip-text text-transparent transition-all duration-300 group-hover:from-primary group-hover:to-secondary">
+                {student.name}
+              </h3>
+              <p className="text-sm text-base-content/60 font-medium">{student.studentId}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 mt-4">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-              student.isFaceEnrolled 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-yellow-100 text-yellow-800'
-            }`}>
-              {student.isFaceEnrolled ? (
-                <>
-                  <UserCheck className="w-3 h-3 mr-1" />
-                  Face Enrolled
-                </>
-              ) : (
-                <>
-                  <UserX className="w-3 h-3 mr-1" />
-                  Not Enrolled
-                </>
-              )}
-            </span>
-            
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-              student.isActive 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}>
-              {student.isActive ? 'Active' : 'Inactive'}
-            </span>
+          {/* Action buttons with micro-interactions */}
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+            {[
+              { icon: Eye, color: 'info', label: 'View' },
+              { icon: Edit, color: 'warning', label: 'Edit' },
+              { icon: Trash2, color: 'error', label: 'Delete', onClick: () => handleDeleteStudent(student._id) }
+            ].map(({ icon: Icon, color, label, onClick }) => (
+              <button
+                key={label}
+                onClick={onClick}
+                className={`p-2 rounded-xl bg-base-200/50 backdrop-blur-sm border border-base-300 transition-all duration-300 hover:scale-110 hover:bg-${color}/20 hover:border-${color}/30 hover:shadow-lg active:scale-95 motion-reduce:transform-none tooltip`}
+                data-tip={label}
+              >
+                <Icon className={`w-4 h-4 text-${color}`} />
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-            <Eye className="w-4 h-4" />
-          </button>
-          <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-            <Edit className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => handleDeleteStudent(student._id)}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+        {/* Student info grid */}
+        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+          {[
+            { label: 'Email', value: student.email },
+            { label: 'Department', value: student.department || 'N/A' },
+            { label: 'Semester', value: student.semester || 'N/A' },
+            { label: 'Room', value: student.roomNumber || 'Not assigned' }
+          ].map((item, i) => (
+            <div 
+              key={item.label}
+              className="transform transition-all duration-300 delay-100 group-hover:translate-x-1"
+            >
+              <span className="text-base-content/60 font-medium">{item.label}</span>
+              <p className="text-base-content font-semibold truncate">{item.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Status badges */}
+        <div className="flex items-center gap-3">
+          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:scale-105 motion-reduce:transform-none ${
+            student.isFaceEnrolled 
+              ? 'bg-success/20 text-success border border-success/30' 
+              : 'bg-warning/20 text-warning border border-warning/30'
+          }`}>
+            {student.isFaceEnrolled ? (
+              <>
+                <UserCheck className="w-3 h-3 mr-1.5 transform transition-transform duration-300 group-hover:scale-125" />
+                Face Enrolled
+              </>
+            ) : (
+              <>
+                <UserX className="w-3 h-3 mr-1.5 transform transition-transform duration-300 group-hover:scale-125" />
+                Pending Enrollment
+              </>
+            )}
+          </span>
+          
+          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:scale-105 ${
+            student.isActive 
+              ? 'bg-success/20 text-success border border-success/30' 
+              : 'bg-error/20 text-error border border-error/30'
+          }`}>
+            {student.isActive ? 'Active' : 'Inactive'}
+          </span>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Student Management</h1>
-          <p className="mt-2 text-gray-600">Manage student accounts and enrollment status</p>
+return (
+  <div className="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-300 dark:from-base-300 dark:via-base-200 dark:to-base-400 transition-all duration-500">
+    <Navbar />
+    
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Enhanced Header */}
+      <div className="mb-8 text-center lg:text-left">
+        <div className="relative inline-block">
+          <h1 className="text-4xl lg:text-5xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent transition-all duration-500 hover:scale-105 transform-gpu">
+            Student Management
+          </h1>
+          <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
         </div>
+        <p className="mt-4 text-lg text-base-content/70 max-w-2xl mx-auto lg:mx-0">
+          Manage student accounts with advanced facial recognition enrollment
+        </p>
+      </div>
 
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
+      {/* Glass morphism search and filters */}
+      <div className="bg-base-100/50 dark:bg-base-200/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-6 lg:p-8 mb-8 transform-gpu transition-all duration-500 hover:shadow-3xl">
+        <div className="flex flex-col lg:flex-row gap-6 items-end lg:items-center">
+          {/* Enhanced Search */}
+          <div className="flex-1 w-full">
+            <label className="block text-sm font-bold text-base-content/80 mb-2">
+              Search Students
+            </label>
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/60 transition-colors duration-300 group-focus-within:text-primary" />
                 <input
                   type="text"
                   placeholder="Search by name, email, or student ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3 bg-base-200/50 backdrop-blur-sm border border-base-300 rounded-2xl text-base-content placeholder-base-content/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300"
                 />
               </div>
             </div>
+          </div>
 
-            {/* Filters */}
-            <div className="flex gap-4">
-              <select
-                value={filters.department}
-                onChange={(e) => handleFilterChange('department', e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Departments</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Information Technology">Information Technology</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Mechanical">Mechanical</option>
-              </select>
-
-              <select
-                value={filters.semester}
-                onChange={(e) => handleFilterChange('semester', e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Semesters</option>
-                {[1,2,3,4,5,6,7,8].map(sem => (
-                  <option key={sem} value={sem}>Semester {sem}</option>
-                ))}
-              </select>
-
-              <select
-                value={filters.enrolled}
-                onChange={(e) => handleFilterChange('enrolled', e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Students</option>
-                <option value="true">Face Enrolled</option>
-                <option value="false">Not Enrolled</option>
-              </select>
-            </div>
+          {/* Enhanced Filters */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+            {[
+              {
+                value: filters.department,
+                onChange: (e) => handleFilterChange('department', e.target.value),
+                options: ['All Departments', 'Computer Science', 'Information Technology', 'Electronics', 'Mechanical'],
+                label: 'Department'
+              },
+              {
+                value: filters.semester,
+                onChange: (e) => handleFilterChange('semester', e.target.value),
+                options: ['All Semesters', ...Array.from({length: 8}, (_, i) => `Semester ${i + 1}`)],
+                label: 'Semester'
+              },
+              {
+                value: filters.enrolled,
+                onChange: (e) => handleFilterChange('enrolled', e.target.value),
+                options: ['All Students', 'Face Enrolled', 'Not Enrolled'],
+                label: 'Enrollment'
+              }
+            ].map((filter, index) => (
+              <div key={filter.label} className="flex-1 lg:flex-none">
+                <label className="block text-sm font-bold text-base-content/80 mb-2">
+                  {filter.label}
+                </label>
+                <select
+                  value={filter.value}
+                  onChange={filter.onChange}
+                  className="w-full lg:w-48 px-4 py-3 bg-base-200/50 backdrop-blur-sm border border-base-300 rounded-2xl text-base-content focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 appearance-none"
+                >
+                  {filter.options.map(option => (
+                    <option key={option} value={option === 'All Departments' || option === 'All Semesters' || option === 'All Students' ? '' : option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
-
-        {/* Students Grid */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="spinner mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading students...</p>
-          </div>
-        ) : students.length === 0 ? (
-          <div className="text-center py-12">
-            <Users className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-4 text-lg font-medium text-gray-900">No students found</h3>
-            <p className="mt-2 text-gray-600">No students match your current filters.</p>
-          </div>
-        ) : (
-          <>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {students.map(renderStudentCard)}
-            </div>
-
-            {/* Pagination */}
-            {pagination.totalPages > 1 && (
-              <div className="flex justify-center mt-8">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                    disabled={pagination.page === 1}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Previous
-                  </button>
-                  
-                  <span className="px-4 py-2 text-gray-600">
-                    Page {pagination.page} of {pagination.totalPages}
-                  </span>
-                  
-                  <button
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                    disabled={pagination.page === pagination.totalPages}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
       </div>
+
+      {/* Enhanced Error Message */}
+      {error && (
+        <div className="bg-error/20 border border-error/30 text-error-content px-6 py-4 rounded-2xl mb-6 backdrop-blur-sm transform-gpu transition-all duration-500 hover:scale-[1.02]">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <p className="font-semibold">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Students Grid */}
+      {loading ? (
+        <div className="text-center py-16 space-y-4">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-base-content/70 font-semibold">Loading students...</p>
+        </div>
+      ) : students.length === 0 ? (
+        <div className="text-center py-16 bg-base-100/50 backdrop-blur-sm rounded-3xl border border-white/20 transform-gpu transition-all duration-500 hover:scale-[1.01]">
+          <Users className="mx-auto h-16 w-16 text-base-content/40 mb-4" />
+          <h3 className="text-xl font-bold text-base-content/80 mb-2">No students found</h3>
+          <p className="text-base-content/60">Try adjusting your search or filters</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {students.map((student, index) => renderStudentCard(student, index))}
+          </div>
+
+          {/* Enhanced Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="flex justify-center mt-12">
+              <div className="flex gap-3 items-center bg-base-100/50 backdrop-blur-sm rounded-2xl border border-white/20 p-2">
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  disabled={pagination.page === 1}
+                  className="px-6 py-3 rounded-xl bg-base-200 border border-base-300 disabled:opacity-30 disabled:cursor-not-allowed transform transition-all duration-300 hover:scale-105 hover:bg-base-300 active:scale-95 motion-reduce:transform-none font-semibold"
+                >
+                  Previous
+                </button>
+                
+                <span className="px-6 py-3 text-base-content font-bold min-w-[120px] text-center">
+                  Page {pagination.page} of {pagination.totalPages}
+                </span>
+                
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  disabled={pagination.page === pagination.totalPages}
+                  className="px-6 py-3 rounded-xl bg-base-200 border border-base-300 disabled:opacity-30 disabled:cursor-not-allowed transform transition-all duration-300 hover:scale-105 hover:bg-base-300 active:scale-95 motion-reduce:transform-none font-semibold"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
-  );
+
+    <style jsx>{`
+      @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-10px) rotate(120deg); }
+        66% { transform: translateY(5px) rotate(240deg); }
+      }
+      .animate-float {
+        animation: float ease-in-out infinite;
+      }
+      
+      @media (prefers-reduced-motion: reduce) {
+        .animate-float {
+          animation: none;
+        }
+      }
+      
+      .hover\\:shadow-3xl:hover {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 25px -5px rgba(59, 130, 246, 0.1);
+      }
+    `}</style>
+  </div>
+);
 };
 
 export default AdminStudents;

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 import Navbar from '../components/Navbar';
 import Webcam from 'react-webcam';
@@ -28,42 +29,6 @@ const FaceEnrollment = () => {
     } catch (error) {
       console.error('Status check error:', error);
     }
-  };
-
-  const captureImage = useCallback(async () => {
-    if (!webcamRef.current) return;
-
-    const imageSrc = webcamRef.current.getScreenshot();
-    if (!imageSrc) {
-      setError('Failed to capture image. Please try again.');
-      return;
-    }
-
-    await enrollFace(imageSrc);
-  }, [enrollFace]);
-
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file.');
-      return;
-    }
-
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB.');
-      return;
-    }
-
-    // Convert to base64
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      await enrollFace(e.target.result);
-    };
-    reader.readAsDataURL(file);
   };
 
   const enrollFace = async (imageData) => {
@@ -101,15 +66,51 @@ const FaceEnrollment = () => {
     }
   };
 
+  const captureImage = useCallback(async () => {
+    if (!webcamRef.current) return;
+
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (!imageSrc) {
+      setError('Failed to capture image. Please try again.');
+      return;
+    }
+
+    await enrollFace(imageSrc);
+  }, []);
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file.');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB.');
+      return;
+    }
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      await enrollFace(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar />
       
       <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Face Enrollment</h1>
-            <p className="mt-2 text-lg text-gray-600">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-200">Face Enrollment</h1>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 transition-colors duration-200">
               Enroll your face for secure attendance marking
             </p>
           </div>
@@ -117,19 +118,19 @@ const FaceEnrollment = () => {
           {/* Enrollment Status */}
           {enrollmentStatus && (
             <div className="mb-6">
-              <div className={`p-4 rounded-lg border ${
+              <div className={`p-4 rounded-lg border transition-colors duration-200 ${
                 enrollmentStatus.isFaceEnrolled 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-yellow-50 border-yellow-200'
+                  ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700' 
+                  : 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-700'
               }`}>
                 <div className="flex items-center">
                   {enrollmentStatus.isFaceEnrolled ? (
                     <>
                       <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                      <span className="text-green-800 font-medium">
+                      <span className="text-green-800 dark:text-green-300 font-medium transition-colors duration-200">
                         Face already enrolled! 
                         {enrollmentStatus.enrollmentDate && (
-                          <span className="text-green-600 ml-1">
+                          <span className="text-green-600 dark:text-green-400 ml-1 transition-colors duration-200">
                             (Enrolled on {new Date(enrollmentStatus.enrollmentDate).toLocaleDateString()})
                           </span>
                         )}
@@ -138,7 +139,7 @@ const FaceEnrollment = () => {
                   ) : (
                     <>
                       <AlertCircle className="h-5 w-5 text-yellow-400 mr-2" />
-                      <span className="text-yellow-800 font-medium">
+                      <span className="text-yellow-800 dark:text-yellow-300 font-medium transition-colors duration-200">
                         Face not enrolled. Please enroll your face to use attendance features.
                       </span>
                     </>
@@ -150,13 +151,13 @@ const FaceEnrollment = () => {
 
           {/* Messages */}
           {message && (
-            <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+            <div className="mb-4 p-4 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded transition-colors duration-200">
               {message}
             </div>
           )}
           
           {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded transition-colors duration-200">
               {error}
             </div>
           )}
