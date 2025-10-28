@@ -13,6 +13,7 @@ import logging
 import os
 import time
 import hashlib
+import requests  # Added for Cloudinary URL downloads
 from datetime import datetime
 from PIL import Image
 import numpy as np
@@ -30,6 +31,26 @@ SIMILARITY_THRESHOLD = 0.70  # 70% similarity = 90%+ confidence
 
 # Store image hashes for basic recognition (simulates face encodings)
 stored_image_features = {}
+
+def download_image_from_url(image_url):
+    """Download image from Cloudinary URL and convert to PIL Image"""
+    try:
+        logger.info(f"🔗 Downloading image from URL: {image_url[:100]}...")
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Convert to PIL Image
+        pil_image = Image.open(io.BytesIO(response.content))
+        
+        # Convert to RGB if necessary
+        if pil_image.mode != 'RGB':
+            pil_image = pil_image.convert('RGB')
+        
+        logger.info(f"✅ Successfully downloaded image: {pil_image.size}")
+        return pil_image
+    except Exception as e:
+        logger.error(f"❌ Error downloading image from URL: {e}")
+        return None
 
 def base64_to_image(base64_string):
     """Convert base64 string to PIL Image"""
@@ -51,6 +72,27 @@ def base64_to_image(base64_string):
         return pil_image
     except Exception as e:
         logger.error(f"Error converting base64 to image: {str(e)}")
+        return None
+
+def process_image_input(data):
+    """Process image from either Cloudinary URL or base64 data"""
+    try:
+        # Check if image_url is provided (Cloudinary)
+        if 'image_url' in data:
+            logger.info("📷 Processing image from Cloudinary URL")
+            return download_image_from_url(data['image_url'])
+        
+        # Check if base64 image is provided (fallback)
+        elif 'image' in data:
+            logger.info("📷 Processing base64 image")
+            return base64_to_image(data['image'])
+        
+        else:
+            logger.error("❌ No image data provided (neither image_url nor image)")
+            return None
+            
+    except Exception as e:
+        logger.error(f"❌ Error processing image input: {e}")
         return None
 
 def extract_simple_features(image):
@@ -132,27 +174,34 @@ def health_check():
 def encode_face():
     """
     Enhanced face encoding endpoint with basic image analysis
+    Supports both Cloudinary URLs and base64 images
     """
     try:
         data = request.get_json()
         
-        if not data or 'image' not in data:
+        if not data:
             return jsonify({
                 "success": False,
-                "message": "No image data provided"
+                "message": "No data provided"
+            }), 400
+        
+        # Check for either image_url or image field
+        if 'image_url' not in data and 'image' not in data:
+            return jsonify({
+                "success": False,
+                "message": "No image data provided (image_url or image required)"
             }), 400
         
         student_id = data.get('studentId', 'unknown')
-        image_base64 = data['image']
         
-        logger.info(f"Processing enhanced face encoding for student: {student_id}")
+        logger.info(f"🎯 Processing enhanced face encoding for student: {student_id}")
         
-        # Convert base64 to image
-        image = base64_to_image(image_base64)
+        # Process image from either Cloudinary URL or base64
+        image = process_image_input(data)
         if image is None:
             return jsonify({
                 "success": False,
-                "message": "Invalid image data"
+                "message": "Failed to process image data"
             }), 400
         
         # Extract simple features
@@ -199,17 +248,30 @@ def encode_face():
 def recognize_face():
     """
     Enhanced face recognition endpoint with basic image analysis
+    Supports both Cloudinary URLs and base64 images
     """
     try:
         data = request.get_json()
         
-        if not data or 'image' not in data or 'encodings' not in data:
+        if not data:
             return jsonify({
                 "success": False,
-                "message": "Missing image data or face encodings"
+                "message": "No data provided"
             }), 400
         
-        image_base64 = data['image']
+        # Check for either image_url or image field
+        if 'image_url' not in data and 'image' not in data:
+            return jsonify({
+                "success": False,
+                "message": "No image data provided (image_url or image required)"
+            }), 400
+            
+        if 'encodings' not in data:
+            return jsonify({
+                "success": False,
+                "message": "Missing face encodings data"
+            }), 400
+        
         stored_encodings = data['encodings']
         
         if not stored_encodings:
@@ -218,14 +280,14 @@ def recognize_face():
                 "message": "No enrolled students found for comparison"
             }), 400
         
-        logger.info(f"Processing enhanced face recognition against {len(stored_encodings)} enrolled students")
+        logger.info(f"🎯 Processing enhanced face recognition against {len(stored_encodings)} enrolled students")
         
-        # Convert base64 to image
-        image = base64_to_image(image_base64)
+        # Process image from either Cloudinary URL or base64
+        image = process_image_input(data)
         if image is None:
             return jsonify({
                 "success": False,
-                "message": "Invalid image data"
+                "message": "Failed to process image data"
             }), 400
         
         # Extract features from current image
@@ -249,7 +311,12 @@ def recognize_face():
                 similarity = compare_features(current_features, stored_features)
             else:
                 # Fallback: use a hash-based approach for consistency
-                image_hash = hashlib.md5(image_base64.encode()).hexdigest()
+                # Generate hash from image data or URL
+                if 'image_url' in data:
+                    image_data = data['image_url']
+                else:
+                    image_data = data['image']
+                image_hash = hashlib.md5(image_data.encode()).hexdigest()
                 encoding_hash = hashlib.md5(str(encoding_data['encoding']).encode()).hexdigest()
                 
                 # Simple hash comparison (not very accurate but consistent)

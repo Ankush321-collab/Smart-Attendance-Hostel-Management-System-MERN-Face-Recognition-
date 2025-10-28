@@ -659,7 +659,7 @@ const AdminVisitors = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white 
+                  className="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-purple-500 
                     rounded-xl font-semibold shadow-lg transition-all duration-300
                     hover:shadow-xl hover:scale-105 active:scale-95
                     focus:outline-none focus:ring-2 focus:ring-primary/50"

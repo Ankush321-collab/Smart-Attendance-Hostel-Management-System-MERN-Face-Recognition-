@@ -18,7 +18,11 @@ const FaceEncodingSchema = new mongoose.Schema({
   },
   imagePath: {
     type: String,
-    required: true
+    required: true // Now stores Cloudinary URL
+  },
+  cloudinaryPublicId: {
+    type: String,
+    required: false // For deletion purposes
   },
   enrollmentDate: {
     type: Date,
@@ -31,7 +35,23 @@ const FaceEncodingSchema = new mongoose.Schema({
   lastUpdated: {
     type: Date,
     default: Date.now
+  },
+  metadata: {
+    spoof_score: Number,
+    face_location: [Number],
+    enrollment_timestamp: String,
+    cloudinary_details: {
+      url: String,
+      public_id: String,
+      resource_type: String,
+      format: String,
+      width: Number,
+      height: Number,
+      bytes: Number
+    }
   }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('FaceEncoding', FaceEncodingSchema);

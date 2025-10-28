@@ -51,11 +51,15 @@ const UserSchema = new mongoose.Schema({
     trim: true
   },
   profileImage: {
-    type: String,
+    type: String, // Now stores Cloudinary URL
+    default: null
+  },
+  cloudinaryPublicId: {
+    type: String, // For deletion purposes
     default: null
   },
   faceEncodingPath: {
-    type: String,
+    type: String, // Now stores Cloudinary URL
     default: null
   },
   isFaceEnrolled: {

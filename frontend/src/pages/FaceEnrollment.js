@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 import Navbar from '../components/Navbar';
 import Webcam from 'react-webcam';
